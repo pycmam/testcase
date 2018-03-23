@@ -43,7 +43,7 @@ class LockRepository extends ServiceEntityRepository
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function create(Account $source, Account $destination, int $amount)
+    public function create(?Account $source, ?Account $destination, int $amount)
     {
         $lock = new Lock();
         $lock->setSource($source);

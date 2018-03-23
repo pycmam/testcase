@@ -1,17 +1,37 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: rustam
- * Date: 23.03.2018
- * Time: 10:02
- */
 
 namespace App\Operation;
 
-class SubLockedBalanceOperation extends SubBalanceOperation implements BalanceOperationInterface
-{
-    public function execute(): bool 
-    {
+use App\Event\BalanceSubLocked;
 
+class SubLockedBalanceOperation extends AccountBalanceOperation implements BalanceOperationInterface
+{
+    /**
+     * @return bool
+     * @throws \App\Exception\AccountIsBusyException
+     * @throws \App\Exception\NotEnoughBalanceException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function execute(): bool
+    {
+        try {
+            $this->lockAccount($this->params['account']);
+
+            $this->validateAvailableBalance($this->params['account'], $this->params['amount']);
+
+            $lock = $this->lockRepository->create($this->params['account'], null, $this->params['amount']);
+
+            $result = (bool)$lock->getId();
+
+            if ($result) {
+                $this->dispatcher->dispatch('balance.sub.locked', new BalanceSubLocked([$lock]));
+            }
+        } finally {
+            $this->releaseAccount($this->params['account']);
+        }
+
+        return $result;
     }
 }

@@ -64,13 +64,13 @@ class Lock
     }
 
 
-    public function getCreated(): ?\DateTimeImmutable
+    public function getCreated(): ?\DateTime
     {
         return $this->created;
     }
 
 
-    public function setCreated(\DateTimeImmutable $created): self
+    public function setCreated(\DateTime $created): self
     {
         $this->created = $created;
 
@@ -78,13 +78,13 @@ class Lock
     }
 
 
-    public function getApproved(): ?\DateTimeImmutable
+    public function getApproved(): ?\DateTime
     {
         return $this->approved;
     }
 
 
-    public function setApproved(?\DateTimeImmutable $approved): self
+    public function setApproved(?\DateTime $approved): self
     {
         $this->approved = $approved;
 
@@ -104,7 +104,7 @@ class Lock
     }
 
 
-    public function setSource(Account $account): self
+    public function setSource(?Account $account): self
     {
         $this->source = $account;
 
@@ -112,7 +112,7 @@ class Lock
     }
 
 
-    public function setDestination(Account $account): self
+    public function setDestination(?Account $account): self
     {
         $this->destination = $account;
 

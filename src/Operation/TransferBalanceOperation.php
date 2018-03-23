@@ -23,15 +23,17 @@ class TransferBalanceOperation extends BalanceOperation implements BalanceOperat
             $this->lockAccount($this->params['destination']);
             $this->validateAvailableBalance($this->params['source'], $this->params['amount']);
 
-            $result = $this->operationRepository->transactional(function () {
+            $operations = $this->operationRepository->transactional(function () {
                 $sourceOp = $this->operationRepository->create($this->params['source'], -1 * $this->params['amount']);
                 $destOp = $this->operationRepository->create($this->params['destination'], $this->params['amount']);
 
                 return [$sourceOp, $destOp];
             });
 
-            if (false !== $result || is_array($result)) {
-                $this->dispatcher->dispatch('balance.add', new BalanceTransferSuccess($result));
+            $result = false !== $operations || is_array($operations);
+
+            if ($result) {
+                $this->dispatcher->dispatch('balance.transfer', new BalanceTransferSuccess($operations));
             }
         } finally {
             $this->releaseAccount($this->params['source']);

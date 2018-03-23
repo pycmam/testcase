@@ -25,7 +25,7 @@ class SubBalanceOperation extends AccountBalanceOperation implements BalanceOper
             $result = (bool)$operation->getId();
 
             if ($result) {
-                $this->dispatcher->dispatch('balance.add', new BalanceSubSuccess([$operation]));
+                $this->dispatcher->dispatch('balance.sub', new BalanceSubSuccess([$operation]));
             }
         } finally {
             $this->releaseAccount($this->params['account']);

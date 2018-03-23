@@ -7,6 +7,7 @@ use App\Exception\AccountIsBusyException;
 use App\Exception\InvalidOperationParameterException;
 use App\Exception\NotEnoughBalanceException;
 use App\Repository\AccountRepository;
+use App\Repository\LockRepository;
 use App\Repository\OperationRepository;
 use PhpParser\Node\Expr\Closure;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -18,6 +19,7 @@ abstract class BalanceOperation implements BalanceOperationInterface
     protected $dispatcher;
     protected $accountRepository;
     protected $operationRepository;
+    protected $lockRepository;
 
 
     /**
@@ -37,15 +39,19 @@ abstract class BalanceOperation implements BalanceOperationInterface
      *
      * @param EventDispatcherInterface $dispatcher
      * @param AccountRepository        $accountRepository
+     * @param OperationRepository      $operationRepository
+     * @param LockRepository           $lockRepository
      */
     public function __construct(
         EventDispatcherInterface $dispatcher,
         AccountRepository $accountRepository,
-        OperationRepository $operationRepository
+        OperationRepository $operationRepository,
+        LockRepository $lockRepository
     ) {
         $this->dispatcher = $dispatcher;
         $this->accountRepository = $accountRepository;
         $this->operationRepository = $operationRepository;
+        $this->lockRepository = $lockRepository;
     }
 
 
