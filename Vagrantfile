@@ -1,6 +1,6 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-Vagrant.require_version ">= 1.7.0"
+Vagrant.require_version ">= 2.0.0"
 
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
 # configures the configuration version (we support older styles for
@@ -13,7 +13,7 @@ Vagrant.configure("2") do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
-  config.vm.box = "debian/stretch64"
+  config.vm.box = "debian/jessie64"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -51,7 +51,8 @@ Vagrant.configure("2") do |config|
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
 
-  config.vm.synced_folder ".", "/vagrant", :owner=> "vagrant", :group => "www-data", :mount_options => ["dmode=775", "fmode=775"], type: "virtualbox"
+  config.vm.synced_folder ".", "/vagrant", :disabled => true
+  config.vm.synced_folder "src/", "/home/vagrant/app", :owner=> "vagrant", :group => "www-data", :mount_options => ["dmode=775", "fmode=775"], :type => "virtualbox"
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -60,7 +61,7 @@ Vagrant.configure("2") do |config|
   config.vm.provider "virtualbox" do |vb|
      # Display the VirtualBox GUI when booting the machine
      vb.gui = false
-     vb.memory = "2048"
+     vb.memory = "1024"
      vb.cpus = 1
      vb.name = "iqoption-testcase"
   end
