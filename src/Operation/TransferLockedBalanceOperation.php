@@ -29,7 +29,7 @@ class TransferLockedBalanceOperation extends TransferBalanceOperation implements
             $result = (bool)$lock->getId();
 
             if ($result) {
-                $this->dispatcher->dispatch('balance.transfer.locked', new BalanceTransferLocked([$lock]));
+                $this->dispatcher->dispatch('balance.transfer.locked', new BalanceTransferLocked($lock));
             }
         } finally {
             $this->releaseAccount($this->params['source']);

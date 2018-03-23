@@ -7,25 +7,25 @@ use Symfony\Component\EventDispatcher\Event;
 
 class LockEvent extends Event implements LockEventInterface
 {
-    private $locks;
+    private $lock;
 
 
     /**
      * LockEvent constructor.
      *
-     * @param array|Lock[] $locks
+     * @param Lock $lock
      */
-    public function __construct(array $locks)
+    public function __construct(Lock $lock)
     {
-        $this->locks = $locks;
+        $this->lock = $lock;
     }
 
 
     /**
-     * @return array|Lock[]
+     * @return Lock
      */
-    public function getLocks(): array
+    public function getLock(): Lock
     {
-        return $this->locks;
+        return $this->lock;
     }
 }

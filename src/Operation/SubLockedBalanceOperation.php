@@ -26,7 +26,7 @@ class SubLockedBalanceOperation extends AccountBalanceOperation implements Balan
             $result = (bool)$lock->getId();
 
             if ($result) {
-                $this->dispatcher->dispatch('balance.sub.locked', new BalanceSubLocked([$lock]));
+                $this->dispatcher->dispatch('balance.sub.locked', new BalanceSubLocked($lock));
             }
         } finally {
             $this->releaseAccount($this->params['account']);

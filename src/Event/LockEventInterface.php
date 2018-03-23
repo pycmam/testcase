@@ -2,7 +2,9 @@
 
 namespace App\Event;
 
+use App\Entity\Lock;
+
 interface LockEventInterface
 {
-    public function getLocks(): array;
+    public function getLock(): Lock;
 }

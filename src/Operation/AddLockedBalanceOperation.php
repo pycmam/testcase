@@ -22,7 +22,7 @@ class AddLockedBalanceOperation extends AccountBalanceOperation implements Balan
             $result = (bool)$lock->getId();
 
             if ($result) {
-                $this->dispatcher->dispatch('balance.add.locked', new BalanceAddLocked([$lock]));
+                $this->dispatcher->dispatch('balance.add.locked', new BalanceAddLocked($lock));
             }
         } finally {
             $this->releaseAccount($this->params['account']);
