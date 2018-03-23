@@ -35,6 +35,16 @@ class LockRepository extends ServiceEntityRepository
 
 
     /**
+     * @param Lock $lock
+     */
+    public function delete(Lock $lock)
+    {
+        $this->getEntityManager()->remove($lock);
+        $this->getEntityManager()->flush();
+    }
+
+
+    /**
      * @param Account $source
      * @param Account $destination
      * @param int     $amount
@@ -43,7 +53,7 @@ class LockRepository extends ServiceEntityRepository
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function create(?Account $source, ?Account $destination, int $amount)
+    public function create(?Account $source, ?Account $destination, int $amount): Lock
     {
         $lock = new Lock();
         $lock->setSource($source);
@@ -54,6 +64,42 @@ class LockRepository extends ServiceEntityRepository
         $this->store($lock);
 
         return $lock;
+    }
+
+
+    /**
+     * @param Account $account
+     *
+     * @return array|Lock[]
+     */
+    public function getAccountLocks(Account $account)
+    {
+        return $this->createQueryBuilder('a')
+            ->where('a.source = :account_id OR a.destination = :account_id')
+            ->orderBy('a.created', 'desc')
+            ->getQuery()
+            ->execute(['account_id' => $account->getId()]);
+    }
+
+
+    /**
+     * @param Lock $lock
+     *
+     * @return bool
+     */
+    public function approve(Lock $lock): bool
+    {
+
+        $result = $this->createQueryBuilder('a')
+            ->update()
+            ->set('a.approved', ':approved')
+            ->where('a.id = :id AND a.approved IS NULL')
+            ->setParameter('approved', new \DateTime(), \Doctrine\DBAL\Types\Type::DATETIME)
+            ->setParameter('id', $lock->getId())
+            ->getQuery()
+            ->execute();
+
+        return $result > 0;
     }
 
 

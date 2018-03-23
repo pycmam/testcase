@@ -2,12 +2,36 @@
 
 namespace App\Operation;
 
+use App\Entity\Account;
 use App\Exception\InvalidOperationParameterException;
 
 abstract class AccountBalanceOperation extends BalanceOperation
 {
 
-    public function getValidators()
+    /**
+     * @return Account
+     */
+    protected function getAccount(): Account
+    {
+        return $this->params['account'];
+    }
+
+
+    /**
+     * @return int
+     */
+    protected function getAmount(): int
+    {
+        return $this->params['amount'];
+    }
+
+
+    /**
+     * @return array
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function getValidators(): array
     {
         return [
             'account' => function ($value) {

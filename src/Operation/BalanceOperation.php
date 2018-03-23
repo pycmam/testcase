@@ -10,6 +10,7 @@ use App\Repository\AccountRepository;
 use App\Repository\LockRepository;
 use App\Repository\OperationRepository;
 use PhpParser\Node\Expr\Closure;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 abstract class BalanceOperation implements BalanceOperationInterface
@@ -25,7 +26,7 @@ abstract class BalanceOperation implements BalanceOperationInterface
     /**
      * @return array|Closure[]
      */
-    abstract protected function getValidators();
+    abstract protected function getValidators(): array;
 
 
     /**
@@ -109,30 +110,36 @@ abstract class BalanceOperation implements BalanceOperationInterface
 
 
     /**
-     * @param Account $account
+     * @param array|Account[] $accounts
      *
-     * @return bool
      * @throws AccountIsBusyException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    protected function lockAccount(Account $account): bool
+    protected function lockAccounts(array $accounts): void
     {
-        $locked = $this->accountRepository->lockAccount($account, $this->lockId);
 
-        if (!$locked) {
-            throw new AccountIsBusyException("Account ID: " . $account->getId());
+        foreach ($accounts as $account) {
+            if ($account) {
+                $locked = $this->accountRepository->lockAccount($account, $this->lockId);
+
+                if (!$locked) {
+                    throw new AccountIsBusyException("Account ID: " . $account->getId());
+                }
+            }
         }
-
-        return $locked;
     }
 
 
     /**
-     * @param Account $account
-     *
-     * @return bool
+     * @param array $accounts
      */
-    protected function releaseAccount(Account $account): bool
+    protected function releaseAccounts(array $accounts): void
     {
-        return $this->accountRepository->releaseAccount($account, $this->lockId);
+        foreach ($accounts as $account) {
+            if ($account) {
+                $this->accountRepository->releaseAccount($account, $this->lockId);
+            }
+        }
     }
 }

@@ -11,23 +11,28 @@ class AddBalanceOperation extends AccountBalanceOperation implements BalanceOper
     /**
      * @return bool
      * @throws AccountIsBusyException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function execute(): bool
     {
         try {
-            $this->lockAccount($this->params['account']);
+            $this->lockAccounts([$this->getAccount()]);
 
-            $operation = $this->operationRepository->create($this->params['account'], $this->params['amount']);
+            $operation = $this->operationRepository->create($this->getAccount(), $this->getAmount());
 
             $result = (bool)$operation->getId();
 
             if ($result)
             {
-                $this->dispatcher->dispatch('balance.add', new BalanceAddSuccess([$operation]));
+                $this->dispatcher->dispatch(BalanceAddSuccess::NAME,
+                    new BalanceAddSuccess(['add' => $operation]));
             }
 
         } finally {
-            $this->releaseAccount($this->params['account']);
+            $this->releaseAccounts([$this->getAccount()]);
         }
 
         return $result;

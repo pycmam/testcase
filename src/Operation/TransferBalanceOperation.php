@@ -2,45 +2,75 @@
 
 namespace App\Operation;
 
+use App\Entity\Account;
 use App\Event\BalanceTransferSuccess;
 use App\Exception\AccountIsBusyException;
 use App\Exception\InvalidOperationParameterException;
 
 class TransferBalanceOperation extends BalanceOperation implements BalanceOperationInterface
 {
+
     /**
      * @return bool
      * @throws AccountIsBusyException
      * @throws \App\Exception\NotEnoughBalanceException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      * @throws \Throwable
      */
     public function execute(): bool
     {
         try {
 
-            $this->lockAccount($this->params['source']);
-            $this->lockAccount($this->params['destination']);
-            $this->validateAvailableBalance($this->params['source'], $this->params['amount']);
+            $this->lockAccounts([$this->getSource(), $this->getDestination()]);
+            $this->validateAvailableBalance($this->getSource(), $this->getAmount());
 
             $operations = $this->operationRepository->transactional(function () {
-                $sourceOp = $this->operationRepository->create($this->params['source'], -1 * $this->params['amount']);
-                $destOp = $this->operationRepository->create($this->params['destination'], $this->params['amount']);
 
-                return [$sourceOp, $destOp];
+                $subOp = $this->operationRepository->create($this->getSource(), -1 * $this->getAmount());
+                $addOp = $this->operationRepository->create($this->getDestination(), $this->getAmount());
+
+                return ['sub' => $subOp, 'add' => $addOp];
             });
 
             $result = false !== $operations || is_array($operations);
 
             if ($result) {
-                $this->dispatcher->dispatch('balance.transfer', new BalanceTransferSuccess($operations));
+                $this->dispatcher->dispatch(BalanceTransferSuccess::NAME,
+                    new BalanceTransferSuccess($operations));
             }
         } finally {
-            $this->releaseAccount($this->params['source']);
-            $this->releaseAccount($this->params['destination']);
+            $this->releaseAccounts([$this->getSource(), $this->getDestination()]);
         }
 
         return $result;
+    }
+
+
+    /**
+     * @return int
+     */
+    protected function getAmount(): int
+    {
+        return $this->params['amount'];
+    }
+
+
+    /**
+     * @return Account
+     */
+    protected function getSource(): Account
+    {
+        return $this->params['source'];
+    }
+
+
+    /**
+     * @return Account
+     */
+    protected function getDestination(): Account
+    {
+        return $this->params['destination'];
     }
 
 
@@ -53,7 +83,7 @@ class TransferBalanceOperation extends BalanceOperation implements BalanceOperat
     {
         parent::bindParams($values);
 
-        if ($this->params['source']->getId() == $this->params['destination']->getId()) {
+        if ($this->getSource()->getId() == $this->getDestination()->getId()) {
             throw new InvalidOperationParameterException("Source and destination account is same!");
         }
 
@@ -61,7 +91,10 @@ class TransferBalanceOperation extends BalanceOperation implements BalanceOperat
     }
 
 
-    public function getValidators()
+    /**
+     * @return array
+     */
+    public function getValidators(): array
     {
         return [
             'source' => function ($value) {

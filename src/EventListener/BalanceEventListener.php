@@ -2,6 +2,7 @@
 
 namespace App\EventListener;
 
+use App\Entity\Operation;
 use App\Event\BalanceAddLocked;
 use App\Event\BalanceAddSuccess;
 use App\Event\BalanceSubLocked;
@@ -23,24 +24,39 @@ class BalanceEventListener
 
     public function onAddSuccess(BalanceAddSuccess $event)
     {
+        /**
+         * @var Operation $operation
+         */
+        $operation = $event->getOperations()['add'];
+
         $this->logger->info(sprintf('Added %d coins to %s',
-            $event->getOperations()[0]->getAmount(), $event->getOperations()[0]->getAccount()->getUsername()));
+            $operation->getAmount(), $operation->getAccount()->getUsername()));
     }
 
 
     public function onSubSuccess(BalanceSubSuccess $event)
     {
+        /**
+         * @var Operation $operation
+         */
+        $operation = $event->getOperations()['sub'];
+
         $this->logger->info(sprintf('Sub %d coins from %s',
-            abs($event->getOperations()[0]->getAmount()), $event->getOperations()[0]->getAccount()->getUsername()));
+            abs($operation->getAmount()), $operation->getAccount()->getUsername()));
     }
 
 
     public function onTransferSuccess(BalanceTransferSuccess $event)
     {
-        list ($source, $destination) = $event->getOperations();
+        /**
+         * @var Operation $subOperation
+         * @var Operation $addOperation
+         */
+        $subOperation = $event->getOperations()['sub'];
+        $addOperation = $event->getOperations()['add'];
 
-        $this->logger->info(sprintf('Transfer %d coins from %s to %s', $source->getAmount(),
-            $source->getAccount()->getUsername(), $destination->getAccount()->getUsername()));
+        $this->logger->info(sprintf('Transfer %d coins from %s to %s', $addOperation->getAmount(),
+            $subOperation->getAccount()->getUsername(), $addOperation->getAccount()->getUsername()));
     }
 
 

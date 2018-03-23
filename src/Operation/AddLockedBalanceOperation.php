@@ -11,21 +11,23 @@ class AddLockedBalanceOperation extends AccountBalanceOperation implements Balan
      * @throws \App\Exception\AccountIsBusyException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function execute(): bool
     {
         try {
-            $this->lockAccount($this->params['account']);
+            $this->lockAccounts([$this->getAccount()]);
 
-            $lock = $this->lockRepository->create(null, $this->params['account'], $this->params['amount']);
+            $lock = $this->lockRepository->create(null, $this->getAccount(), $this->getAmount());
 
             $result = (bool)$lock->getId();
 
             if ($result) {
-                $this->dispatcher->dispatch('balance.add.locked', new BalanceAddLocked($lock));
+                $this->dispatcher->dispatch(BalanceAddLocked::NAME, new BalanceAddLocked($lock));
             }
         } finally {
-            $this->releaseAccount($this->params['account']);
+            $this->releaseAccounts([$this->getAccount()]);
         }
 
         return $result;

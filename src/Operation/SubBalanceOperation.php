@@ -11,24 +11,28 @@ class SubBalanceOperation extends AccountBalanceOperation implements BalanceOper
      * @return bool
      * @throws AccountIsBusyException
      * @throws \App\Exception\NotEnoughBalanceException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function execute(): bool
     {
         try {
-            $this->lockAccount($this->params['account']);
+            $this->lockAccounts([$this->getAccount()]);
 
-            $this->validateAvailableBalance($this->params['account'], $this->params['amount']);
+            $this->validateAvailableBalance($this->getAccount(), $this->getAmount());
 
-            $operation = $this->operationRepository->create($this->params['account'], -1 * $this->params['amount']);
+            $operation = $this->operationRepository->create($this->getAccount(), -1 * $this->getAmount());
 
             $result = (bool)$operation->getId();
 
             if ($result) {
-                $this->dispatcher->dispatch('balance.sub', new BalanceSubSuccess([$operation]));
+                $this->dispatcher->dispatch(BalanceSubSuccess::NAME,
+                    new BalanceSubSuccess(['sub' => $operation]));
             }
         } finally {
-            $this->releaseAccount($this->params['account']);
+            $this->releaseAccounts([$this->getAccount()]);
         }
 
         return $result;

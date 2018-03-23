@@ -30,7 +30,7 @@ class OperationRepository extends ServiceEntityRepository
     public function store(Operation $operation)
     {
         $this->getEntityManager()->persist($operation);
-        $this->getEntityManager()->flush();
+        $this->getEntityManager()->flush($operation);
     }
 
 
@@ -39,6 +39,8 @@ class OperationRepository extends ServiceEntityRepository
      * @param int     $amount
      *
      * @return Operation
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function create(Account $account, int $amount)
     {
@@ -81,6 +83,16 @@ class OperationRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
 
         return (int) $result;
+    }
+
+
+    public function getAccountOperations(Account $account)
+    {
+        return $this->createQueryBuilder('o')
+            ->where('o.account = :account_id')
+            ->orderBy('o.created', 'desc')
+            ->getQuery()
+            ->execute(['account_id' => $account->getId()]);
     }
 
 

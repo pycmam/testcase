@@ -29,29 +29,52 @@ class Account
     private $busyByPid;
 
 
+    /**
+     * @return int
+     */
     public function getBusyByPid(): int
     {
         return $this->busyByPid;
     }
 
 
+    /**
+     * @return int|null
+     */
     public function getId(): ?int
     {
         return $this->id;
     }
 
 
+    /**
+     * @return null|string
+     */
     public function getUsername(): ?string
     {
         return $this->username;
     }
 
 
+    /**
+     * @param string $username
+     *
+     * @return Account
+     */
     public function setUsername(string $username): self
     {
         $this->username = $username;
 
         return $this;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->getUsername();
     }
 
 }
