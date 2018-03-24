@@ -16,23 +16,21 @@
 vagrunt up && vagrant ssh
 ```
 
-Vagrant скачает образ debian/jessie64 и развернет в виртуалке необходимое окружение.
-
-Создать БД, мигрировать и загрузить тестовые данные:
-
-```
-cd ~/app
-./console doctrine:database:create
-./console doctrine:migrations:migrate -n
-./console doctrine:fixtures:load -n
-```
+Vagrant скачает образ debian/jessie64 и развернет в виртуалке необходимое окружение и зависимости проекта.
 
 Запустить воркеры очереди (можно любое количество)
 
 ```
+cd app
 php console rabbitmq:consumer balance &
 php console rabbitmq:consumer balance &
 php console rabbitmq:consumer balance &
+```
+
+Контролировать выполнение операций можно по логу:
+
+```
+tail -f var/log/dev.log
 ```
 
 ## Команды для тестирования работы воркеров:
