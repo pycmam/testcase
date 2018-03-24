@@ -35,45 +35,58 @@ php console rabbitmq:consumer balance &
 php console rabbitmq:consumer balance &
 ```
 
-Команды для тестирования работы воркеров:
+## Команды для тестирования работы воркеров:
 
+Показать текущее состояние аккаунта
 ```
-# показать текущее состояние аккаунта
 # app:balance:show <account_id>
 
 php console app:balance:show 1
+```
 
-# зачислить средства
+Зачислить средства
+```
 # app:balance:add <account_id> <amount> --lock=<locked>
 
 php console app:balance:add 1 555
+```
 
-# зачислить и поставить в блокировку (модерацию)
+Зачислить и поставить в блокировку (модерацию)
+```
 php console app:balance:add 1 1000 --lock=1
+```
 
-# списать/вывести средства
+Списать/вывести средства
+```
 # app:balance:sub <account_id> <amount> --lock=<locked>
 
 php console app:balance:sub 1 100
+```
 
-# перевод средств между аккаунтами
+Перевод средств между аккаунтами
+```
 # app:balance:sub <source_id> <destination_id> <amount> --lock=<locked>
 
 php console app:balance:transfer 1 2 100
+```
 
-# с блокировкой
+С блокировкой
+```
 php console app:balance:transfer 2 1 200 --lock=1
+```
 
-# подтвердить заблокированную опервацию
+Подтвердить заблокированную опервацию
+```
 # app:lock:approve <lock_id>
 
 php console app:lock:approve 1
+```
 
-# отменить заблокированную операцию
+Отменить заблокированную операцию
+```
 # app:lock:remove <lock_id>
 
 php console app:lock:remove 2
-
 ```
 
 Если блокировка была подтверждена, то ее нелья повторно подтвердить или удалить.
