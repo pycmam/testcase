@@ -25,10 +25,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class BalanceOperationFactory
 {
-    const OP_ADD      = 'add';
-    const OP_SUB      = 'sub';
-    const OP_TRANSFER = 'transfer';
-
     protected $dispatcher;
     protected $accountRepository;
     protected $operationRepository;

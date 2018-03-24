@@ -52,7 +52,7 @@ Vagrant.configure("2") do |config|
   # argument is a set of non-required options.
 
   config.vm.synced_folder ".", "/vagrant", :disabled => true
-  config.vm.synced_folder "src/", "/home/vagrant/app", :owner=> "vagrant", :group => "www-data", :mount_options => ["dmode=775", "fmode=775"], :type => "virtualbox"
+  config.vm.synced_folder ".", "/home/vagrant/app", :owner=> "vagrant", :group => "www-data", :mount_options => ["dmode=775", "fmode=775"], :type => "virtualbox"
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -102,7 +102,8 @@ Vagrant.configure("2") do |config|
      # install php 7.2 and required exts
      apt-get install -y php7.2 php7.2-bcmath php7.2-mbstring php7.2-pgsql php7.2-xml
 
-
-
+     php /home/vagrant/app/console doctrine:database:create
+     php /home/vagrant/app/console doctrine:migrations:migrate -n
+     php /home/vagrant/app/console doctrine:fixtures:load -n
   SHELL
 end
