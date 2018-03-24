@@ -26,6 +26,13 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-#    App\Operation\:
-#        resource: '../src/Operation'
-#        public: true
+    App\EventListener\BalanceEventListener:
+        tags:
+            - { name: kernel.event_listener, event: balance.add.success }
+            - { name: kernel.event_listener, event: balance.sub.success }
+            - { name: kernel.event_listener, event: balance.transfer.success }
+            - { name: kernel.event_listener, event: balance.add.locked }
+            - { name: kernel.event_listener, event: balance.sub.locked }
+            - { name: kernel.event_listener, event: balance.transfer.locked }
+            - { name: kernel.event_listener, event: balance.lock.approved }
+            - { name: kernel.event_listener, event: balance.lock.removed }

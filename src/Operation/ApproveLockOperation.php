@@ -3,6 +3,7 @@
 namespace App\Operation;
 
 use App\Event\BalanceAddSuccess;
+use App\Event\BalanceLockApproved;
 use App\Event\BalanceSubSuccess;
 use App\Event\BalanceTransferSuccess;
 
@@ -43,13 +44,14 @@ class ApproveLockOperation extends LockOperation
                     return $operations;
                 });
 
-
-
             // dispatch events
+
+            $this->dispatcher->dispatch(BalanceLockApproved::NAME,
+                new BalanceLockApproved($this->getLock()));
 
             if (isset($operations['sub'], $operations['add'])) {
                 $this->dispatcher->dispatch(BalanceTransferSuccess::NAME,
-                    new BalanceTransferSuccess(array_values($operations)));
+                    new BalanceTransferSuccess($operations));
             } elseif (isset($operations['sub'])) {
                 $this->dispatcher->dispatch(BalanceSubSuccess::NAME,
                     new BalanceSubSuccess([$operations['sub']]));
@@ -59,7 +61,6 @@ class ApproveLockOperation extends LockOperation
             }
 
             return true;
-
         } finally {
             $this->releaseAccounts([$this->getSource(), $this->getDestination()]);
         }

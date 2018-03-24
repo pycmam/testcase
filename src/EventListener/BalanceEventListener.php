@@ -5,48 +5,71 @@ namespace App\EventListener;
 use App\Entity\Operation;
 use App\Event\BalanceAddLocked;
 use App\Event\BalanceAddSuccess;
+use App\Event\BalanceLockApproved;
+use App\Event\BalanceLockRemoved;
 use App\Event\BalanceSubLocked;
 use App\Event\BalanceSubSuccess;
 use App\Event\BalanceTransferLocked;
 use App\Event\BalanceTransferSuccess;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Class BalanceEventListener
+ * @package App\EventListener
+ */
 class BalanceEventListener
 {
+    /**
+     * @var LoggerInterface
+     */
     private $logger;
 
 
+    /**
+     * BalanceEventListener constructor.
+     *
+     * @param LoggerInterface $logger
+     */
     public function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
 
 
-    public function onAddSuccess(BalanceAddSuccess $event)
+    /**
+     * @param BalanceAddSuccess $event
+     */
+    public function onBalanceAddSuccess(BalanceAddSuccess $event)
     {
         /**
          * @var Operation $operation
          */
         $operation = $event->getOperations()['add'];
 
-        $this->logger->info(sprintf('Added %d coins to %s',
+        $this->logger->info(sprintf('Add %d coins to %s SUCCESS',
             $operation->getAmount(), $operation->getAccount()->getUsername()));
     }
 
 
-    public function onSubSuccess(BalanceSubSuccess $event)
+    /**
+     * @param BalanceSubSuccess $event
+     */
+    public function onBalanceSubSuccess(BalanceSubSuccess $event)
     {
         /**
          * @var Operation $operation
          */
         $operation = $event->getOperations()['sub'];
 
-        $this->logger->info(sprintf('Sub %d coins from %s',
+        $this->logger->info(sprintf('Sub %d coins from %s SUCCESS',
             abs($operation->getAmount()), $operation->getAccount()->getUsername()));
     }
 
 
-    public function onTransferSuccess(BalanceTransferSuccess $event)
+    /**
+     * @param BalanceTransferSuccess $event
+     */
+    public function onBalanceTransferSuccess(BalanceTransferSuccess $event)
     {
         /**
          * @var Operation $subOperation
@@ -55,30 +78,58 @@ class BalanceEventListener
         $subOperation = $event->getOperations()['sub'];
         $addOperation = $event->getOperations()['add'];
 
-        $this->logger->info(sprintf('Transfer %d coins from %s to %s', $addOperation->getAmount(),
+        $this->logger->info(sprintf('Transfer %d coins from %s to %s SUCCESS', $addOperation->getAmount(),
             $subOperation->getAccount()->getUsername(), $addOperation->getAccount()->getUsername()));
     }
 
 
-    public function onAddLocked(BalanceAddLocked $event)
+    /**
+     * @param BalanceAddLocked $event
+     */
+    public function onBalanceAddLocked(BalanceAddLocked $event)
     {
-        $this->logger->info(sprintf('Locked add %d coins to %s',
+        $this->logger->info(sprintf('Add %d coins to %s LOCKED',
             $event->getLock()->getAmount(), $event->getLock()->getDestination()->getUsername()));
     }
 
 
-    public function onSubLocked(BalanceSubLocked $event)
+    /**
+     * @param BalanceSubLocked $event
+     */
+    public function onBalanceSubLocked(BalanceSubLocked $event)
     {
-        $this->logger->info(sprintf('Locked sub %d coins from %s',
+        $this->logger->info(sprintf('Sub %d coins from %s LOCKED',
             $event->getLock()->getAmount(), $event->getLock()->getSource()->getUsername()));
     }
 
 
-    public function onTransferLocked(BalanceTransferLocked $event)
+    /**
+     * @param BalanceTransferLocked $event
+     */
+    public function onBalanceTransferLocked(BalanceTransferLocked $event)
     {
         $lock = $event->getLock();
 
-        $this->logger->info(sprintf('Transfer %d coins from %s to %s', $lock->getAmount(),
+        $this->logger->info(sprintf('Transfer %d coins from %s to %s LOCKED', $lock->getAmount(),
             $lock->getSource()->getUsername(), $lock->getDestination()->getUsername()));
     }
+
+
+    /**
+     * @param BalanceLockApproved $event
+     */
+    public function onBalanceLockApproved(BalanceLockApproved $event)
+    {
+        $this->logger->info(sprintf('Lock %d APPROVED', $event->getLock()->getId()));
+    }
+
+
+    /**
+     * @param BalanceLockRemoved $event
+     */
+    public function onBalanceLockRemoved(BalanceLockRemoved $event)
+    {
+        $this->logger->info(sprintf('Lock %d REMOVED', $event->getLock()->getId()));
+    }
+
 }
