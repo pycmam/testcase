@@ -73,7 +73,7 @@ Vagrant.configure("2") do |config|
 #    ansible.playbook = "playbooks/vagrant.yml"
 #  end
 
-  config.vm.network "forwarded_port", guest: 3306, host: 3307
+  #config.vm.network "forwarded_port", guest: 3306, host: 3307
   #
   # View the documentation for the provider you are using for more
   # information on available options.
